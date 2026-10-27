@@ -336,14 +336,12 @@ textarea:focus-visible {
   padding-bottom: 8px;
 }
 
-.column {
-  flex: 0 0 280px;
-  width: 280px;
-}
-
+.column,
 .add-board {
-  flex: 0 0 88px;
-  width: 88px;
+  flex: 0 0 var(--board-width);
+  width: var(--board-width);
+  min-width: var(--board-width);
+  max-width: var(--board-width);
 }
 
 .column {
@@ -377,7 +375,9 @@ textarea:focus-visible {
 
 .add-board {
   min-height: 280px;
-  padding: 16px 10px;
+  display: grid;
+  place-items: center;
+  padding: 16px;
   border: 1px dashed var(--border);
   border-radius: var(--radius);
   background: transparent;
@@ -441,6 +441,10 @@ textarea:focus-visible {
   color: var(--text-h);
   font-size: 16px;
   font-weight: 700;
+}
+
+.column-name-input:focus-visible {
+  outline: none;
 }
 
 .column-header-meta {

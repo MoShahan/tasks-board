@@ -22,6 +22,7 @@
   --medium: #fbbf24;
   --low: #94a3b8;
   --radius: 14px;
+  --board-width: 320px;
   --sans: "Plus Jakarta Sans", system-ui, sans-serif;
   color-scheme: dark;
   font-family: var(--sans);

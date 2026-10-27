@@ -207,7 +207,7 @@ describe("App", () => {
     const nextName = `${originalName} renamed`;
     await user.clear(nameInput);
     await user.type(nameInput, nextName);
-    await user.keyboard("{Enter}");
+    await user.click(screen.getByRole("button", { name: "Save board name" }));
 
     expect(screen.getByRole("region", { name: nextName })).toBeInTheDocument();
     expect(screen.getByText(`Renamed board to “${nextName}”`)).toBeInTheDocument();

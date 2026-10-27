@@ -225,7 +225,29 @@ const TaskColumn = ({
         )}
         <div className="column-header-meta">
           <span className="column-count">{tasks.length}</span>
-          {editing ? null : (
+          {editing ? (
+            <button
+              type="button"
+              className="icon-action icon-action-complete column-save"
+              aria-label="Save board name"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={commitName}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </button>
+          ) : (
             <button
               type="button"
               className="icon-action column-rename"
