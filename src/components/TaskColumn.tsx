@@ -1,13 +1,16 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Board, DragKind, Task } from "../types";
+import { validateBoardName } from "../utils/boards";
 
 import TaskCard from "./TaskCard";
 
 type TaskColumnProps = {
   board: Board;
   tasks: Task[];
+  autoEdit?: boolean;
   dragKind: DragKind | null;
+  onRename: (boardId: string, name: string) => void;
   onComplete: (taskId: string) => void;
   onUncomplete: (taskId: string) => void;
   onEdit: (task: Task) => void;
@@ -20,6 +23,7 @@ type TaskColumnProps = {
     place: "before" | "after",
   ) => void;
   onDragKind: (kind: DragKind | null) => void;
+  onAutoEditDone?: () => void;
 };
 
 function parseDragPayload(raw: string): { kind: DragKind; id: string } | null {
@@ -37,7 +41,9 @@ function parseDragPayload(raw: string): { kind: DragKind; id: string } | null {
 const TaskColumn = ({
   board,
   tasks,
+  autoEdit = false,
   dragKind,
+  onRename,
   onComplete,
   onUncomplete,
   onEdit,
@@ -46,10 +52,53 @@ const TaskColumn = ({
   onMoveTask,
   onReorderBoard,
   onDragKind,
+  onAutoEditDone,
 }: TaskColumnProps) => {
   const [dragDepth, setDragDepth] = useState(0);
   const [dropPlace, setDropPlace] = useState<"before" | "after" | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [editing, setEditing] = useState(autoEdit);
+  const [draftName, setDraftName] = useState(board.name);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing) {
+      nameRef.current?.focus();
+      nameRef.current?.select();
+    }
+  }, [editing]);
+
+  const startEditing = () => {
+    setDraftName(board.name);
+    setNameError(null);
+    setEditing(true);
+  };
+
+  const commitName = () => {
+    const error = validateBoardName(draftName);
+    if (error) {
+      setNameError(error);
+      nameRef.current?.focus();
+      return;
+    }
+
+    const nextName = draftName.trim();
+    if (nextName !== board.name) {
+      onRename(board.id, nextName);
+    }
+
+    setNameError(null);
+    setEditing(false);
+    onAutoEditDone?.();
+  };
+
+  const cancelName = () => {
+    setDraftName(board.name);
+    setNameError(null);
+    setEditing(false);
+    onAutoEditDone?.();
+  };
 
   const updateDropPlace = (clientX: number, target: HTMLElement) => {
     const rect = target.getBoundingClientRect();
@@ -64,9 +113,14 @@ const TaskColumn = ({
           : ""
       }${isDragging ? " is-dragging" : ""}`}
       aria-label={board.name}
-      draggable
+      draggable={!editing}
       onDragStart={(event) => {
         const target = event.target as HTMLElement;
+        if (target.closest("input, .column-header button")) {
+          event.preventDefault();
+          return;
+        }
+
         if (target.closest(".task-card")) {
           return;
         }
@@ -125,8 +179,74 @@ const TaskColumn = ({
       }}
     >
       <header className="column-header">
-        <h2>{board.name}</h2>
-        <span className="column-count">{tasks.length}</span>
+        {editing ? (
+          <label className="column-name-field">
+            <span className="visually-hidden">Board name</span>
+            <input
+              ref={nameRef}
+              className="column-name-input"
+              value={draftName}
+              aria-label="Board name"
+              aria-invalid={Boolean(nameError)}
+              onChange={(event) => {
+                setDraftName(event.target.value);
+                if (nameError) {
+                  setNameError(validateBoardName(event.target.value));
+                }
+              }}
+              onBlur={commitName}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  commitName();
+                }
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  cancelName();
+                }
+              }}
+            />
+            {nameError ? (
+              <span className="field-error" role="alert">
+                {nameError}
+              </span>
+            ) : null}
+          </label>
+        ) : (
+          <button
+            type="button"
+            className="column-title"
+            onClick={startEditing}
+          >
+            <h2>{board.name}</h2>
+          </button>
+        )}
+        <div className="column-header-meta">
+          <span className="column-count">{tasks.length}</span>
+          {editing ? null : (
+            <button
+              type="button"
+              className="icon-action column-rename"
+              aria-label={`Rename ${board.name}`}
+              onClick={startEditing}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="column-body">

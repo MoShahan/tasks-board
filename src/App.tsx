@@ -41,6 +41,7 @@ function App() {
     duplicate,
     restore,
     createBoard,
+    updateBoard,
     reorderBoards,
   } = useTaskStore();
   const { toasts, push, dismiss } = useToasts();
@@ -54,6 +55,7 @@ function App() {
   }>({ key: "dueDate", direction: "asc" });
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [newBoardId, setNewBoardId] = useState<string | null>(null);
   const [dragKind, setDragKind] = useState<DragKind | null>(null);
 
   const hasActiveFilters =
@@ -178,8 +180,14 @@ function App() {
   };
 
   const handleAddBoard = () => {
-    createBoard();
+    const id = createBoard();
+    setNewBoardId(id);
     push({ message: "Created a new board" });
+  };
+
+  const handleRenameBoard = (boardId: string, name: string) => {
+    updateBoard(boardId, name);
+    push({ message: `Renamed board to “${name}”` });
   };
 
   const handleReorderBoard = (
@@ -253,12 +261,18 @@ function App() {
               key={board.id}
               board={board}
               tasks={boardTasks.filter((task) => task.boardId === board.id)}
+              autoEdit={board.id === newBoardId}
               dragKind={dragKind}
+              onRename={handleRenameBoard}
               onMoveTask={handleMove}
               onReorderBoard={handleReorderBoard}
               onDragKind={setDragKind}
+              onAutoEditDone={() => setNewBoardId(null)}
               onDeleteTask={handleDelete}
-              {...taskHandlers}
+              onComplete={handleComplete}
+              onUncomplete={handleUncomplete}
+              onEdit={openEdit}
+              onDuplicate={handleDuplicate}
             />
           ))}
           <button type="button" className="add-board" onClick={handleAddBoard}>
