@@ -43,6 +43,7 @@ function App() {
     createBoard,
     updateBoard,
     removeBoard,
+    restoreBoard,
     reorderBoards,
   } = useTaskStore();
   const { toasts, push, dismiss } = useToasts();
@@ -141,7 +142,7 @@ function App() {
     push({
       message: `Deleted “${task.title}”`,
       actionLabel: "Undo",
-      duration: 7000,
+      duration: 5000,
       onAction: () => {
         restore(task, index);
         push({ message: `Restored “${task.title}”` });
@@ -209,8 +210,17 @@ function App() {
       return;
     }
 
+    const index = boards.findIndex((item) => item.id === boardId);
     removeBoard(boardId);
-    push({ message: `Deleted “${board.name}”` });
+    push({
+      message: `Deleted “${board.name}”`,
+      actionLabel: "Undo",
+      duration: 5000,
+      onAction: () => {
+        restoreBoard(board, index);
+        push({ message: `Restored “${board.name}”` });
+      },
+    });
   };
 
   const handleReorderBoard = (
@@ -284,6 +294,7 @@ function App() {
               key={board.id}
               board={board}
               tasks={boardTasks.filter((task) => task.boardId === board.id)}
+              canDelete
               autoEdit={board.id === newBoardId}
               dragKind={dragKind}
               onRename={handleRenameBoard}
@@ -292,11 +303,8 @@ function App() {
               onDragKind={setDragKind}
               onAutoEditDone={() => setNewBoardId(null)}
               onDeleteTask={handleDelete}
+              {...taskHandlers}
               onDelete={handleDeleteBoard}
-              onComplete={handleComplete}
-              onUncomplete={handleUncomplete}
-              onEdit={openEdit}
-              onDuplicate={handleDuplicate}
             />
           ))}
           <button type="button" className="add-board" onClick={handleAddBoard}>
