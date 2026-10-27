@@ -10,9 +10,8 @@ import ToastStack from "./components/ToastStack";
 import ViewToggle from "./components/ViewToggle";
 import { useTaskStore } from "./hooks/useTaskStore";
 import { useToasts } from "./hooks/useToasts";
+import { boardNameById } from "./utils/boards";
 import { filterTasks, sortTasks, sortTasksBy } from "./utils/tasks";
-import type { Status } from "./constants";
-import { STATUS_LABELS } from "./constants";
 import type {
   ListSortKey,
   SortDirection,
@@ -26,15 +25,25 @@ import "./App.css";
 
 const defaultFilters: TaskFilters = {
   search: "",
-  status: "all",
   priority: "all",
 };
 
 function App() {
-  const { tasks, create, update, complete, remove, duplicate, restore } =
-    useTaskStore();
+  const {
+    boards,
+    tasks,
+    create,
+    update,
+    complete,
+    uncomplete,
+    remove,
+    duplicate,
+    restore,
+    createBoard,
+  } = useTaskStore();
   const { toasts, push, dismiss } = useToasts();
   const [filters, setFilters] = useState<TaskFilters>(defaultFilters);
+  const [hideCompleted, setHideCompleted] = useState(false);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [view, setView] = useState<ViewMode>("board");
   const [listSort, setListSort] = useState<{
@@ -45,13 +54,11 @@ function App() {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const hasActiveFilters =
-    filters.search.trim() !== "" ||
-    filters.status !== "all" ||
-    filters.priority !== "all";
+    filters.search.trim() !== "" || filters.priority !== "all";
 
   const filteredTasks = useMemo(
-    () => filterTasks(tasks, filters),
-    [tasks, filters],
+    () => filterTasks(tasks, filters, hideCompleted),
+    [tasks, filters, hideCompleted],
   );
 
   const boardTasks = useMemo(
@@ -60,19 +67,12 @@ function App() {
   );
 
   const listTasks = useMemo(
-    () => sortTasksBy(filteredTasks, listSort.key, listSort.direction),
-    [filteredTasks, listSort],
+    () => sortTasksBy(filteredTasks, listSort.key, listSort.direction, boards),
+    [filteredTasks, listSort, boards],
   );
 
   const visibleTasks = view === "board" ? boardTasks : listTasks;
-
-  const pendingTasks = boardTasks.filter((task) => task.status === "pending");
-  const inProgressTasks = boardTasks.filter(
-    (task) => task.status === "in-progress",
-  );
-  const completedTasks = boardTasks.filter(
-    (task) => task.status === "completed",
-  );
+  const showListEmpty = view === "list" && visibleTasks.length === 0;
 
   const openCreate = () => {
     setEditingTask(null);
@@ -105,6 +105,14 @@ function App() {
     complete(taskId);
     if (task) {
       push({ message: `Marked “${task.title}” completed` });
+    }
+  };
+
+  const handleUncomplete = (taskId: string) => {
+    const task = tasks.find((item) => item.id === taskId);
+    uncomplete(taskId);
+    if (task) {
+      push({ message: `Marked “${task.title}” incomplete` });
     }
   };
 
@@ -146,14 +154,16 @@ function App() {
     }
   };
 
-  const handleMove = (taskId: string, status: Status) => {
+  const handleMove = (taskId: string, boardId: string) => {
     const task = tasks.find((item) => item.id === taskId);
-    if (!task || task.status === status) {
+    if (!task || task.boardId === boardId) {
       return;
     }
 
-    update(taskId, { status });
-    push({ message: `Moved “${task.title}” to ${STATUS_LABELS[status]}` });
+    update(taskId, { boardId });
+    push({
+      message: `Moved “${task.title}” to ${boardNameById(boards, boardId)}`,
+    });
   };
 
   const handleListSort = (key: ListSortKey) => {
@@ -164,8 +174,14 @@ function App() {
     );
   };
 
+  const handleAddBoard = () => {
+    createBoard();
+    push({ message: "Created a new board" });
+  };
+
   const taskHandlers = {
     onComplete: handleComplete,
+    onUncomplete: handleUncomplete,
     onEdit: openEdit,
     onDuplicate: handleDuplicate,
     onDelete: handleDelete,
@@ -193,52 +209,45 @@ function App() {
         filters={filters}
         sortDirection={sortDirection}
         hasActiveFilters={hasActiveFilters}
+        hideCompleted={hideCompleted}
         showDueDateSort={view === "board"}
         onSearchChange={(search) =>
           setFilters((current) => ({ ...current, search }))
-        }
-        onStatusChange={(status) =>
-          setFilters((current) => ({ ...current, status }))
         }
         onPriorityChange={(priority) =>
           setFilters((current) => ({ ...current, priority }))
         }
         onSortChange={setSortDirection}
+        onHideCompletedChange={setHideCompleted}
         onClear={() => {
           setFilters(defaultFilters);
           push({ message: "Filters cleared" });
         }}
       />
 
-      {visibleTasks.length === 0 ? (
-        <EmptyState hasActiveFilters={hasActiveFilters} />
+      {showListEmpty ? (
+        <EmptyState hasActiveFilters={hasActiveFilters || hideCompleted} />
       ) : view === "board" ? (
         <div className="board">
-          <TaskColumn
-            title="Pending"
-            status="pending"
-            tasks={pendingTasks}
-            onMove={handleMove}
-            {...taskHandlers}
-          />
-          <TaskColumn
-            title="In Progress"
-            status="in-progress"
-            tasks={inProgressTasks}
-            onMove={handleMove}
-            {...taskHandlers}
-          />
-          <TaskColumn
-            title="Completed"
-            status="completed"
-            tasks={completedTasks}
-            onMove={handleMove}
-            {...taskHandlers}
-          />
+          {boards.map((board) => (
+            <TaskColumn
+              key={board.id}
+              board={board}
+              tasks={boardTasks.filter((task) => task.boardId === board.id)}
+              onMoveTask={handleMove}
+              onDeleteTask={handleDelete}
+              onDragKind={() => {}}
+              {...taskHandlers}
+            />
+          ))}
+          <button type="button" className="add-board" onClick={handleAddBoard}>
+            Add board
+          </button>
         </div>
       ) : (
         <TaskList
           tasks={listTasks}
+          boards={boards}
           sortKey={listSort.key}
           sortDirection={listSort.direction}
           onSort={handleListSort}
@@ -249,6 +258,7 @@ function App() {
       {modalOpen ? (
         <TaskModal
           task={editingTask}
+          boards={boards}
           onClose={closeModal}
           onSubmit={handleSubmit}
         />

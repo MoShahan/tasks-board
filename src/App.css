@@ -138,7 +138,7 @@ textarea:focus-visible {
 
 .filter-bar {
   display: grid;
-  grid-template-columns: 1.4fr repeat(3, minmax(140px, 1fr)) auto;
+  grid-template-columns: 1.4fr repeat(2, minmax(140px, 1fr)) minmax(160px, auto) auto;
   gap: 12px;
   align-items: end;
   padding: 16px;
@@ -149,7 +149,69 @@ textarea:focus-visible {
 }
 
 .filter-bar-list {
-  grid-template-columns: 1.4fr repeat(2, minmax(140px, 1fr)) auto;
+  grid-template-columns: 1.4fr minmax(140px, 1fr) minmax(160px, auto) auto;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hide-completed-switch {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.hide-completed-track {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.hide-completed-track::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.hide-completed-switch.is-on .hide-completed-track {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.hide-completed-switch.is-on .hide-completed-track::after {
+  transform: translateX(18px);
+  background: var(--accent);
+}
+
+.hide-completed-copy {
+  font-size: 14px;
 }
 
 .field {
@@ -267,10 +329,21 @@ textarea:focus-visible {
 }
 
 .board {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.column {
+  flex: 0 0 280px;
+  width: 280px;
+}
+
+.add-board {
+  flex: 0 0 88px;
+  width: 88px;
 }
 
 .column {
@@ -280,7 +353,13 @@ textarea:focus-visible {
   min-height: 280px;
   display: flex;
   flex-direction: column;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  cursor: grab;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+
+.column.is-dragging {
+  opacity: 0.45;
+  cursor: grabbing;
 }
 
 .column.is-drop-target {
@@ -288,18 +367,87 @@ textarea:focus-visible {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+.column.is-drop-before {
+  box-shadow: -4px 0 0 var(--accent);
+}
+
+.column.is-drop-after {
+  box-shadow: 4px 0 0 var(--accent);
+}
+
+.add-board {
+  min-height: 280px;
+  padding: 16px 10px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.add-board:hover,
+.add-board:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent-hover);
+  background: var(--accent-soft);
+}
+
 .column-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   padding: 16px 16px 12px;
   border-bottom: 1px solid var(--border);
 }
 
+.column-title {
+  min-width: 0;
+  flex: 1;
+  padding: 2px 4px;
+  margin: -2px -4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+}
+
+.column-title:hover,
+.column-title:focus-visible {
+  background: var(--surface-hover);
+}
+
+.column-title h2,
 .column-header h2 {
   font-size: 16px;
   font-weight: 700;
   color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.column-name-field {
+  min-width: 0;
+  flex: 1;
+}
+
+.column-name-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 6px 8px;
+  color: var(--text-h);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.column-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .column-count {
@@ -345,6 +493,26 @@ textarea:focus-visible {
 .task-card.is-dragging {
   opacity: 0.4;
   cursor: grabbing;
+}
+
+.task-card.is-completed,
+.task-table tbody tr.is-completed {
+  opacity: 0.58;
+}
+
+.task-card.is-completed .task-title,
+.task-card.is-completed .task-description,
+.task-table tbody tr.is-completed .task-title,
+.task-table tbody tr.is-completed .task-description {
+  text-decoration: line-through;
+}
+
+.completed-on {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-hover);
+  text-decoration: none;
 }
 
 .task-card-top {
@@ -439,6 +607,18 @@ textarea:focus-visible {
   color: var(--accent-hover);
 }
 
+.icon-action-incomplete {
+  background: rgba(148, 163, 184, 0.12);
+  border-color: transparent;
+  color: var(--muted);
+}
+
+.icon-action-incomplete:hover,
+.icon-action-incomplete:focus-visible {
+  background: var(--surface-hover);
+  color: var(--text-h);
+}
+
 .icon-action-danger {
   border-color: transparent;
   color: var(--danger);
@@ -502,7 +682,7 @@ textarea:focus-visible {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  min-width: 760px;
+  min-width: 860px;
 }
 
 .task-table th,
@@ -514,10 +694,18 @@ textarea:focus-visible {
 }
 
 .task-table .col-title {
-  width: 40%;
+  width: 32%;
 }
 
-.task-table .col-status,
+.task-table .col-board {
+  width: 12%;
+  white-space: nowrap;
+}
+
+.task-table .col-status {
+  width: 16%;
+}
+
 .task-table .col-priority,
 .task-table .col-dueDate {
   width: 12%;
@@ -671,7 +859,7 @@ textarea:focus-visible {
 
 @media (max-width: 960px) {
   .filter-bar,
-  .board,
+  .filter-bar-list,
   .modal-grid {
     grid-template-columns: 1fr;
   }

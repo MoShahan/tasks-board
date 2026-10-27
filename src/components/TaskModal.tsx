@@ -8,13 +8,14 @@ import {
   STATUS_LABELS,
   STATUS_VALUES,
 } from "../constants";
-import type { Task, TaskDraft } from "../types";
+import type { Board, Task, TaskDraft } from "../types";
 import { fromDateInputValue, toDateInputValue, validateTaskTitle } from "../utils/tasks";
 
 import SelectField from "./SelectField";
 
 type TaskModalProps = {
   task?: Task | null;
+  boards: Board[];
   onClose: () => void;
   onSubmit: (draft: TaskDraft) => void;
 };
@@ -26,12 +27,13 @@ const defaultDueDate = () => {
   return date;
 };
 
-const TaskModal = ({ task, onClose, onSubmit }: TaskModalProps) => {
+const TaskModal = ({ task, boards, onClose, onSubmit }: TaskModalProps) => {
   const titleId = useId();
   const titleRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState(task?.title ?? "");
   const [description, setDescription] = useState(task?.description ?? "");
-  const [status, setStatus] = useState<Status>(task?.status ?? "pending");
+  const [boardId, setBoardId] = useState(task?.boardId ?? boards[0]?.id ?? "");
+  const [status, setStatus] = useState<Status>(task?.status ?? "open");
   const [priority, setPriority] = useState<Priority>(task?.priority ?? "medium");
   const [dueDate, setDueDate] = useState(
     toDateInputValue(task?.dueDate ?? defaultDueDate()),
@@ -65,9 +67,11 @@ const TaskModal = ({ task, onClose, onSubmit }: TaskModalProps) => {
     onSubmit({
       title: title.trim(),
       description: description.trim(),
+      boardId,
       status,
       priority,
       dueDate: fromDateInputValue(dueDate),
+      completedAt: status === "completed" ? (task?.completedAt ?? null) : null,
     });
   };
 
@@ -145,6 +149,16 @@ const TaskModal = ({ task, onClose, onSubmit }: TaskModalProps) => {
 
           <div className="modal-grid">
             <SelectField
+              label="Board"
+              value={boardId}
+              onChange={setBoardId}
+              options={boards.map((board) => ({
+                value: board.id,
+                label: board.name,
+              }))}
+            />
+
+            <SelectField
               label="Status"
               value={status}
               onChange={(value) => setStatus(value as Status)}
@@ -153,7 +167,9 @@ const TaskModal = ({ task, onClose, onSubmit }: TaskModalProps) => {
                 label: STATUS_LABELS[value],
               }))}
             />
+          </div>
 
+          <div className="modal-grid">
             <SelectField
               label="Priority"
               value={priority}
@@ -163,17 +179,17 @@ const TaskModal = ({ task, onClose, onSubmit }: TaskModalProps) => {
                 label: PRIORITY_LABELS[value],
               }))}
             />
-          </div>
 
-          <label className="field">
-            <span className="field-label">Due date</span>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(event) => setDueDate(event.target.value)}
-              required
-            />
-          </label>
+            <label className="field">
+              <span className="field-label">Due date</span>
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(event) => setDueDate(event.target.value)}
+                required
+              />
+            </label>
+          </div>
 
           <div className="modal-actions">
             <button type="button" className="btn btn-ghost" onClick={onClose}>

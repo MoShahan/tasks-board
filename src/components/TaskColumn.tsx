@@ -1,37 +1,38 @@
 import { useState } from "react";
 
-import type { Status } from "../constants";
-import type { Task } from "../types";
+import type { Board, Task } from "../types";
 
 import TaskCard from "./TaskCard";
 
 type TaskColumnProps = {
-  title: string;
-  status: Status;
+  board: Board;
   tasks: Task[];
   onComplete: (taskId: string) => void;
+  onUncomplete: (taskId: string) => void;
   onEdit: (task: Task) => void;
   onDuplicate: (taskId: string) => void;
-  onDelete: (taskId: string) => void;
-  onMove: (taskId: string, status: Status) => void;
+  onDeleteTask: (taskId: string) => void;
+  onMoveTask: (taskId: string, boardId: string) => void;
+  onDragKind: (kind: "task" | null) => void;
 };
 
 const TaskColumn = ({
-  title,
-  status,
+  board,
   tasks,
   onComplete,
+  onUncomplete,
   onEdit,
   onDuplicate,
-  onDelete,
-  onMove,
+  onDeleteTask,
+  onMoveTask,
+  onDragKind,
 }: TaskColumnProps) => {
   const [dragDepth, setDragDepth] = useState(0);
 
   return (
     <section
       className={`column${dragDepth > 0 ? " is-drop-target" : ""}`}
-      aria-label={title}
+      aria-label={board.name}
       onDragEnter={(event) => {
         event.preventDefault();
         setDragDepth((depth) => depth + 1);
@@ -46,14 +47,15 @@ const TaskColumn = ({
       onDrop={(event) => {
         event.preventDefault();
         setDragDepth(0);
-        const taskId = event.dataTransfer.getData("text/plain");
+        const raw = event.dataTransfer.getData("text/plain");
+        const taskId = raw.startsWith("task:") ? raw.slice(5) : raw;
         if (taskId) {
-          onMove(taskId, status);
+          onMoveTask(taskId, board.id);
         }
       }}
     >
       <header className="column-header">
-        <h2>{title}</h2>
+        <h2>{board.name}</h2>
         <span className="column-count">{tasks.length}</span>
       </header>
 
@@ -64,9 +66,11 @@ const TaskColumn = ({
               key={task.id}
               task={task}
               onComplete={onComplete}
+              onUncomplete={onUncomplete}
               onEdit={onEdit}
               onDuplicate={onDuplicate}
-              onDelete={onDelete}
+              onDelete={onDeleteTask}
+              onDragKind={onDragKind}
             />
           ))
         ) : (
