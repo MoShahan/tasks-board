@@ -90,11 +90,24 @@ const TaskModal = ({ task, onClose, onSubmit }: TaskModalProps) => {
           <h2 id={titleId}>{heading}</h2>
           <button
             type="button"
-            className="btn btn-ghost icon-btn"
+            className="icon-action modal-close"
             onClick={onClose}
             aria-label="Close dialog"
           >
-            Close
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
           </button>
         </header>
 

@@ -56,6 +56,19 @@ describe("App", () => {
     expect(screen.getByText(/Restored “Write API contract”/)).toBeInTheDocument();
   });
 
+  it("shows a tooltip when hovering an action icon", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const card = screen.getByRole("heading", {
+      name: "Write API contract",
+    }).closest("article");
+
+    await user.hover(within(card as HTMLElement).getByRole("button", { name: "Delete" }));
+
+    expect(screen.getByRole("tooltip", { name: "Delete" })).toBeInTheDocument();
+  });
+
   it("duplicates a task", async () => {
     const user = userEvent.setup();
     render(<App />);

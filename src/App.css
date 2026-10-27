@@ -391,12 +391,70 @@ textarea:focus-visible {
 .task-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
-.task-actions .btn {
-  padding: 8px 10px;
-  font-size: 13px;
+.icon-action {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.icon-action:hover,
+.icon-action:focus-visible {
+  background: var(--surface-hover);
+  border-color: var(--border);
+  color: var(--text-h);
+}
+
+.icon-action-complete {
+  background: var(--accent-soft);
+  border-color: transparent;
+  color: var(--accent-hover);
+}
+
+.icon-action-complete:hover,
+.icon-action-complete:focus-visible {
+  background: rgba(45, 212, 191, 0.2);
+  color: var(--accent-hover);
+}
+
+.icon-action-danger {
+  border-color: transparent;
+  color: var(--danger);
+}
+
+.icon-action-danger:hover,
+.icon-action-danger:focus-visible {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.action-tooltip {
+  position: fixed;
+  z-index: 90;
+  padding: 5px 8px;
+  border-radius: 7px;
+  background: #1b2334;
+  border: 1px solid var(--border);
+  color: var(--text-h);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.action-tooltip-above {
+  transform: translate(-50%, -100%);
 }
 
 .empty-state {
@@ -431,7 +489,7 @@ textarea:focus-visible {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
-  min-width: 1040px;
+  min-width: 760px;
 }
 
 .task-table th,
@@ -443,7 +501,7 @@ textarea:focus-visible {
 }
 
 .task-table .col-title {
-  width: 28%;
+  width: 40%;
 }
 
 .task-table .col-status,
@@ -454,7 +512,7 @@ textarea:focus-visible {
 }
 
 .task-table .col-actions {
-  width: 36%;
+  width: 168px;
 }
 
 .task-table .col-title .task-title {
@@ -506,18 +564,7 @@ textarea:focus-visible {
 .task-table .task-actions {
   flex-wrap: nowrap;
   align-items: center;
-}
-
-.task-table .complete-slot {
-  display: flex;
-  align-items: center;
-  flex: 0 0 9.25rem;
-  min-width: 9.25rem;
-}
-
-.task-table .task-actions .btn {
-  white-space: nowrap;
-  flex-shrink: 0;
+  justify-content: flex-end;
 }
 
 .toast-stack {
@@ -583,6 +630,10 @@ textarea:focus-visible {
 .modal-header h2 {
   color: var(--text-h);
   font-size: 20px;
+}
+
+.modal-close {
+  flex-shrink: 0;
 }
 
 .modal-form,
