@@ -1,15 +1,18 @@
 import { PRIORITY_LABELS, STATUS_LABELS } from "../constants";
-import type { ListSortKey, SortDirection, Task } from "../types";
-import { formatDueDate, isOverdue } from "../utils/tasks";
+import type { Board, ListSortKey, SortDirection, Task } from "../types";
+import { boardNameById } from "../utils/boards";
+import { formatCompletedOn, formatDueDate, isOverdue } from "../utils/tasks";
 
 import TaskActions from "./TaskActions";
 
 type TaskListProps = {
   tasks: Task[];
+  boards: Board[];
   sortKey: ListSortKey;
   sortDirection: SortDirection;
   onSort: (key: ListSortKey) => void;
   onComplete: (taskId: string) => void;
+  onUncomplete: (taskId: string) => void;
   onEdit: (task: Task) => void;
   onDuplicate: (taskId: string) => void;
   onDelete: (taskId: string) => void;
@@ -17,6 +20,7 @@ type TaskListProps = {
 
 const columns: { key: ListSortKey; label: string }[] = [
   { key: "title", label: "Title" },
+  { key: "board", label: "Board" },
   { key: "status", label: "Status" },
   { key: "priority", label: "Priority" },
   { key: "dueDate", label: "Due date" },
@@ -24,10 +28,12 @@ const columns: { key: ListSortKey; label: string }[] = [
 
 const TaskList = ({
   tasks,
+  boards,
   sortKey,
   sortDirection,
   onSort,
   onComplete,
+  onUncomplete,
   onEdit,
   onDuplicate,
   onDelete,
@@ -65,16 +71,31 @@ const TaskList = ({
         <tbody>
           {tasks.map((task) => {
             const overdue = isOverdue(task);
+            const completed = task.status === "completed";
 
             return (
-              <tr key={task.id}>
+              <tr
+                key={task.id}
+                className={completed ? "is-completed" : undefined}
+              >
                 <td className="col-title">
                   <p className="task-title">{task.title}</p>
                   {task.description ? (
                     <p className="task-description">{task.description}</p>
                   ) : null}
                 </td>
-                <td className="col-status">{STATUS_LABELS[task.status]}</td>
+                <td className="col-board">{boardNameById(boards, task.boardId)}</td>
+                <td className="col-status">
+                  <span>{STATUS_LABELS[task.status]}</span>
+                  {completed && task.completedAt ? (
+                    <time
+                      className="completed-on"
+                      dateTime={task.completedAt.toISOString()}
+                    >
+                      {formatCompletedOn(task.completedAt)}
+                    </time>
+                  ) : null}
+                </td>
                 <td className="col-priority">
                   <span className={`chip chip-${task.priority}`}>
                     {PRIORITY_LABELS[task.priority]}
@@ -93,6 +114,7 @@ const TaskList = ({
                   <TaskActions
                     task={task}
                     onComplete={onComplete}
+                    onUncomplete={onUncomplete}
                     onEdit={onEdit}
                     onDuplicate={onDuplicate}
                     onDelete={onDelete}

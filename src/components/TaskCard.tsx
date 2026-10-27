@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { PRIORITY_LABELS } from "../constants";
 import type { Task } from "../types";
-import { formatDueDate, isOverdue } from "../utils/tasks";
+import { formatCompletedOn, formatDueDate, isOverdue } from "../utils/tasks";
 
 import TaskActions from "./TaskActions";
 
@@ -70,6 +70,14 @@ const TaskCard = ({
       <h3 className="task-title">{task.title}</h3>
       {task.description ? (
         <p className="task-description">{task.description}</p>
+      ) : null}
+      {completed && task.completedAt ? (
+        <time
+          className="completed-on"
+          dateTime={task.completedAt.toISOString()}
+        >
+          {formatCompletedOn(task.completedAt)}
+        </time>
       ) : null}
 
       <TaskActions
