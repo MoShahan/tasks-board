@@ -42,6 +42,7 @@ function App() {
     restore,
     createBoard,
     updateBoard,
+    removeBoard,
     reorderBoards,
   } = useTaskStore();
   const { toasts, push, dismiss } = useToasts();
@@ -190,6 +191,28 @@ function App() {
     push({ message: `Renamed board to “${name}”` });
   };
 
+  const handleDeleteBoard = (boardId: string) => {
+    const board = boards.find((item) => item.id === boardId);
+    if (!board) {
+      return;
+    }
+
+    if (tasks.some((task) => task.boardId === boardId)) {
+      push({
+        message: `“${board.name}” must be empty before it can be deleted.`,
+      });
+      return;
+    }
+
+    if (boards.length <= 1) {
+      push({ message: "Keep at least one board." });
+      return;
+    }
+
+    removeBoard(boardId);
+    push({ message: `Deleted “${board.name}”` });
+  };
+
   const handleReorderBoard = (
     boardId: string,
     targetBoardId: string,
@@ -269,6 +292,7 @@ function App() {
               onDragKind={setDragKind}
               onAutoEditDone={() => setNewBoardId(null)}
               onDeleteTask={handleDelete}
+              onDelete={handleDeleteBoard}
               onComplete={handleComplete}
               onUncomplete={handleUncomplete}
               onEdit={openEdit}
