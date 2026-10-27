@@ -294,7 +294,6 @@ function App() {
               key={board.id}
               board={board}
               tasks={boardTasks.filter((task) => task.boardId === board.id)}
-              canDelete
               autoEdit={board.id === newBoardId}
               dragKind={dragKind}
               onRename={handleRenameBoard}
