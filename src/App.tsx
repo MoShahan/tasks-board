@@ -13,6 +13,7 @@ import { useToasts } from "./hooks/useToasts";
 import { boardNameById } from "./utils/boards";
 import { filterTasks, sortTasks, sortTasksBy } from "./utils/tasks";
 import type {
+  DragKind,
   ListSortKey,
   SortDirection,
   Task,
@@ -40,6 +41,7 @@ function App() {
     duplicate,
     restore,
     createBoard,
+    reorderBoards,
   } = useTaskStore();
   const { toasts, push, dismiss } = useToasts();
   const [filters, setFilters] = useState<TaskFilters>(defaultFilters);
@@ -52,6 +54,7 @@ function App() {
   }>({ key: "dueDate", direction: "asc" });
   const [modalOpen, setModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [dragKind, setDragKind] = useState<DragKind | null>(null);
 
   const hasActiveFilters =
     filters.search.trim() !== "" || filters.priority !== "all";
@@ -179,6 +182,22 @@ function App() {
     push({ message: "Created a new board" });
   };
 
+  const handleReorderBoard = (
+    boardId: string,
+    targetBoardId: string,
+    place: "before" | "after",
+  ) => {
+    if (boardId === targetBoardId) {
+      return;
+    }
+
+    const board = boards.find((item) => item.id === boardId);
+    reorderBoards(boardId, targetBoardId, place);
+    if (board) {
+      push({ message: `Reordered “${board.name}”` });
+    }
+  };
+
   const taskHandlers = {
     onComplete: handleComplete,
     onUncomplete: handleUncomplete,
@@ -234,9 +253,11 @@ function App() {
               key={board.id}
               board={board}
               tasks={boardTasks.filter((task) => task.boardId === board.id)}
+              dragKind={dragKind}
               onMoveTask={handleMove}
+              onReorderBoard={handleReorderBoard}
+              onDragKind={setDragKind}
               onDeleteTask={handleDelete}
-              onDragKind={() => {}}
               {...taskHandlers}
             />
           ))}
