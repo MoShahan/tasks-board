@@ -10,7 +10,7 @@ const EmptyState = ({ hasActiveFilters }: EmptyStateProps) => {
       </p>
       <p className="empty-copy">
         {hasActiveFilters
-          ? "Try a different search, status, or priority — or clear filters to see the full board."
+          ? "Try a different search or priority - or clear filters to see the full board."
           : "Create a task to start filling the board."}
       </p>
     </div>

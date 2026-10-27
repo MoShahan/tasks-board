@@ -1,4 +1,6 @@
-import type { Priority, Status } from "../constants";
+import { useId } from "react";
+
+import type { Priority } from "../constants";
 import type { SortDirection, TaskFilters } from "../types";
 
 import SelectField from "./SelectField";
@@ -7,11 +9,12 @@ type FilterBarProps = {
   filters: TaskFilters;
   sortDirection: SortDirection;
   hasActiveFilters: boolean;
+  hideCompleted: boolean;
   showDueDateSort?: boolean;
   onSearchChange: (value: string) => void;
-  onStatusChange: (value: Status | "all") => void;
   onPriorityChange: (value: Priority | "all") => void;
   onSortChange: (value: SortDirection) => void;
+  onHideCompletedChange: (value: boolean) => void;
   onClear: () => void;
 };
 
@@ -19,13 +22,16 @@ const FilterBar = ({
   filters,
   sortDirection,
   hasActiveFilters,
+  hideCompleted,
   showDueDateSort = true,
   onSearchChange,
-  onStatusChange,
   onPriorityChange,
   onSortChange,
+  onHideCompletedChange,
   onClear,
 }: FilterBarProps) => {
+  const hideCompletedLabelId = useId();
+
   return (
     <section
       className={`filter-bar${showDueDateSort ? "" : " filter-bar-list"}`}
@@ -40,18 +46,6 @@ const FilterBar = ({
           onChange={(event) => onSearchChange(event.target.value)}
         />
       </label>
-
-      <SelectField
-        label="Status"
-        value={filters.status}
-        onChange={(value) => onStatusChange(value as Status | "all")}
-        options={[
-          { value: "all", label: "All statuses" },
-          { value: "pending", label: "Pending" },
-          { value: "in-progress", label: "In Progress" },
-          { value: "completed", label: "Completed" },
-        ]}
-      />
 
       <SelectField
         label="Priority"
@@ -76,6 +70,25 @@ const FilterBar = ({
           ]}
         />
       ) : null}
+
+      <div className="field hide-completed-field">
+        <span className="field-label" id={hideCompletedLabelId}>
+          Hide completed
+        </span>
+        <button
+          type="button"
+          className={`hide-completed-switch${hideCompleted ? " is-on" : ""}`}
+          role="switch"
+          aria-checked={hideCompleted}
+          aria-labelledby={hideCompletedLabelId}
+          onClick={() => onHideCompletedChange(!hideCompleted)}
+        >
+          <span className="hide-completed-track" aria-hidden="true" />
+          <span className="hide-completed-copy">
+            {hideCompleted ? "Hidden" : "Shown"}
+          </span>
+        </button>
+      </div>
 
       <button
         type="button"

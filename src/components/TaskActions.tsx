@@ -1,4 +1,4 @@
-import { type ReactNode,useState } from "react";
+import { type ReactNode, useState } from "react";
 import { createPortal } from "react-dom";
 
 import type { Task } from "../types";
@@ -6,6 +6,7 @@ import type { Task } from "../types";
 type TaskActionsProps = {
   task: Task;
   onComplete: (taskId: string) => void;
+  onUncomplete: (taskId: string) => void;
   onEdit: (task: Task) => void;
   onDuplicate: (taskId: string) => void;
   onDelete: (taskId: string) => void;
@@ -71,6 +72,7 @@ const ActionIconButton = ({
 const TaskActions = ({
   task,
   onComplete,
+  onUncomplete,
   onEdit,
   onDuplicate,
   onDelete,
@@ -94,7 +96,20 @@ const TaskActions = ({
   return (
     <div className="task-actions">
       <span className="complete-slot">
-        {task.status !== "completed" ? (
+        {task.status === "completed" ? (
+          <ActionIconButton
+            label="Mark incomplete"
+            className="icon-action-incomplete"
+            onClick={() => onUncomplete(task.id)}
+            onShowTooltip={showTooltip}
+            onHideTooltip={hideTooltip}
+          >
+            <Icon>
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </Icon>
+          </ActionIconButton>
+        ) : (
           <ActionIconButton
             label="Mark completed"
             className="icon-action-complete"
@@ -106,7 +121,7 @@ const TaskActions = ({
               <path d="M20 6 9 17l-5-5" />
             </Icon>
           </ActionIconButton>
-        ) : null}
+        )}
       </span>
       <ActionIconButton
         label="Edit"
