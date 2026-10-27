@@ -1,6 +1,6 @@
 # Tasks Board
 
-A dark-themed task board for creating, editing, completing, and filtering work across Pending, In Progress, and Completed columns.
+A dark-themed task board for creating, editing, completing, and filtering work across Pending, In Progress, and Completed columns. Drag a card from one column to another to move it and update its status.
 
 Live site: [https://moshahan.github.io/tasks-board/](https://moshahan.github.io/tasks-board/)
 
@@ -8,7 +8,7 @@ Live site: [https://moshahan.github.io/tasks-board/](https://moshahan.github.io/
 
 ### Board view
 
-Kanban layout with Pending, In Progress, and Completed columns. Search, status, priority, and due-date sort sit above the board. Each card shows priority, due date, and actions (complete, edit, duplicate, delete).
+Kanban layout with Pending, In Progress, and Completed columns. Search, status, priority, and due-date sort sit above the board. Drag a task onto a different column to drop it there and change its status. Each card shows priority, due date, and actions (complete, edit, duplicate, delete).
 
 ![Board view with three status columns and filter controls](docs/screenshots/board.png)
 
@@ -28,6 +28,7 @@ Modal for adding or updating a task. Title is required; description, status, pri
 
 - Create and edit tasks with title, description, status, priority, and due date
 - Title is required before a task can be saved
+- Drag and drop a task onto a different column (Pending, In Progress, or Completed) to move it and update its status
 - Delete a task, with confirmation
 - Mark a task as completed
 - Search by title

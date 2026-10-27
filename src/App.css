@@ -280,6 +280,12 @@ textarea:focus-visible {
   min-height: 280px;
   display: flex;
   flex-direction: column;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.column.is-drop-target {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .column-header {
@@ -311,6 +317,7 @@ textarea:focus-visible {
 
 .column-body {
   display: flex;
+  flex: 1;
   flex-direction: column;
   gap: 12px;
   padding: 14px;
@@ -332,6 +339,12 @@ textarea:focus-visible {
   flex-direction: column;
   gap: 10px;
   text-align: left;
+  cursor: grab;
+}
+
+.task-card.is-dragging {
+  opacity: 0.4;
+  cursor: grabbing;
 }
 
 .task-card-top {

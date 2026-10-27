@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { PRIORITY_LABELS } from "../constants";
 import type { Task } from "../types";
 import { formatDueDate, isOverdue } from "../utils/tasks";
@@ -20,9 +22,27 @@ const TaskCard = ({
   onDelete,
 }: TaskCardProps) => {
   const overdue = isOverdue(task);
+  const [isDragging, setIsDragging] = useState(false);
 
   return (
-    <article className="task-card">
+    <article
+      className={`task-card${isDragging ? " is-dragging" : ""}`}
+      draggable
+      onDragStart={(event) => {
+        const target = event.target as HTMLElement;
+        if (target.closest("button")) {
+          event.preventDefault();
+          return;
+        }
+
+        event.dataTransfer.setData("text/plain", task.id);
+        event.dataTransfer.effectAllowed = "move";
+        setIsDragging(true);
+      }}
+      onDragEnd={() => {
+        setIsDragging(false);
+      }}
+    >
       <div className="task-card-top">
         <span className={`chip chip-${task.priority}`}>
           {PRIORITY_LABELS[task.priority]}

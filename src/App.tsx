@@ -11,6 +11,8 @@ import ViewToggle from "./components/ViewToggle";
 import { useTaskStore } from "./hooks/useTaskStore";
 import { useToasts } from "./hooks/useToasts";
 import { filterTasks, sortTasks, sortTasksBy } from "./utils/tasks";
+import type { Status } from "./constants";
+import { STATUS_LABELS } from "./constants";
 import type {
   ListSortKey,
   SortDirection,
@@ -144,6 +146,16 @@ function App() {
     }
   };
 
+  const handleMove = (taskId: string, status: Status) => {
+    const task = tasks.find((item) => item.id === taskId);
+    if (!task || task.status === status) {
+      return;
+    }
+
+    update(taskId, { status });
+    push({ message: `Moved “${task.title}” to ${STATUS_LABELS[status]}` });
+  };
+
   const handleListSort = (key: ListSortKey) => {
     setListSort((current) =>
       current.key === key
@@ -202,15 +214,25 @@ function App() {
         <EmptyState hasActiveFilters={hasActiveFilters} />
       ) : view === "board" ? (
         <div className="board">
-          <TaskColumn title="Pending" tasks={pendingTasks} {...taskHandlers} />
+          <TaskColumn
+            title="Pending"
+            status="pending"
+            tasks={pendingTasks}
+            onMove={handleMove}
+            {...taskHandlers}
+          />
           <TaskColumn
             title="In Progress"
+            status="in-progress"
             tasks={inProgressTasks}
+            onMove={handleMove}
             {...taskHandlers}
           />
           <TaskColumn
             title="Completed"
+            status="completed"
             tasks={completedTasks}
+            onMove={handleMove}
             {...taskHandlers}
           />
         </div>

@@ -1,7 +1,31 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import App from "./App";
+
+function createDataTransfer() {
+  const store: Record<string, string> = {};
+
+  return {
+    dropEffect: "move",
+    effectAllowed: "all",
+    files: [] as File[],
+    items: [] as DataTransferItem[],
+    types: [] as string[],
+    setData(format: string, value: string) {
+      store[format] = value;
+    },
+    getData(format: string) {
+      return store[format] ?? "";
+    },
+    clearData() {
+      Object.keys(store).forEach((key) => {
+        delete store[key];
+      });
+    },
+    setDragImage() {},
+  };
+}
 
 describe("App", () => {
   beforeEach(() => {
@@ -83,6 +107,30 @@ describe("App", () => {
 
     expect(screen.getByText("Write API contract (copy)")).toBeInTheDocument();
     expect(screen.getByText(/Duplicated “Write API contract”/)).toBeInTheDocument();
+  });
+
+  it("moves a task to another column and updates its status", () => {
+    render(<App />);
+
+    const card = screen.getByRole("heading", {
+      name: "Write API contract",
+    }).closest("article");
+    const inProgress = screen.getByRole("region", { name: "In Progress" });
+    const dataTransfer = createDataTransfer();
+
+    expect(card).not.toBeNull();
+    fireEvent.dragStart(card as HTMLElement, { dataTransfer });
+    fireEvent.dragEnter(inProgress, { dataTransfer });
+    fireEvent.dragOver(inProgress, { dataTransfer });
+    fireEvent.drop(inProgress, { dataTransfer });
+    fireEvent.dragEnd(card as HTMLElement, { dataTransfer });
+
+    expect(
+      within(inProgress).getByRole("heading", { name: "Write API contract" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Moved “Write API contract” to In Progress/),
+    ).toBeInTheDocument();
   });
 
   it("switches to a sortable list view", async () => {
