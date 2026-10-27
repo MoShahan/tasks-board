@@ -1,7 +1,7 @@
 .app {
-  width: min(1280px, calc(100% - 32px));
-  margin: 0 auto;
-  padding: 28px 0 64px;
+  width: 100%;
+  margin: 0;
+  padding: 28px var(--page-gutter) 64px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -333,7 +333,7 @@ textarea:focus-visible {
   gap: 16px;
   align-items: stretch;
   overflow-x: auto;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
 }
 
 .column,

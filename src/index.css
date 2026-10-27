@@ -23,6 +23,11 @@
   --low: #94a3b8;
   --radius: 14px;
   --board-width: 320px;
+  --page-gutter: 28px;
+  --scrollbar-size: 10px;
+  --scrollbar-thumb: #2a3650;
+  --scrollbar-thumb-hover: #3d4d6e;
+  --scrollbar-track: rgba(16, 22, 36, 0.55);
   --sans: "Plus Jakarta Sans", system-ui, sans-serif;
   color-scheme: dark;
   font-family: var(--sans);
@@ -39,6 +44,37 @@ html,
 body,
 #root {
   min-height: 100%;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 body {
