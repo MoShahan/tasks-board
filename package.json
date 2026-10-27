@@ -1,5 +1,6 @@
 {
-  "name": "recro-tasks-management",
+  "name": "tasks-board",
+  "homepage": "https://moshahan.github.io/tasks-board/",
   "private": true,
   "version": "0.0.0",
   "type": "module",

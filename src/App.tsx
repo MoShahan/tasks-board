@@ -166,7 +166,7 @@ function App() {
           <img src={logo} alt="" className="brand-logo" width={36} height={36} />
           <div>
             <p className="brand-kicker">Task manager</p>
-            <h1>Recro Tasks</h1>
+            <h1>Tasks Board</h1>
           </div>
         </div>
         <div className="header-actions">

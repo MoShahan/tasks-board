@@ -1,6 +1,8 @@
-# Recro Tasks
+# Tasks Board
 
 A dark-themed task board for creating, editing, completing, and filtering work across Pending, In Progress, and Completed columns.
+
+Live site: [https://moshahan.github.io/tasks-board/](https://moshahan.github.io/tasks-board/)
 
 ## Screenshots
 
@@ -50,7 +52,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite (usually `http://localhost:5173`).
+Open the local URL printed by Vite (usually `http://localhost:5173/tasks-board/`).
 
 ### Other commands
 
@@ -64,7 +66,7 @@ npm run preview     # preview the production build
 
 ## Persistence
 
-Tasks are saved to `localStorage` under the `recro-tasks` key. Clearing site data (or that key) restores the demo board on the next load.
+Tasks are saved to `localStorage` under the `tasks-board` key. Clearing site data (or that key) restores the demo board on the next load.
 
 ## Project structure
 
@@ -82,9 +84,17 @@ public/
   apple-touch-icon.png
 ```
 
-## CI
+## CI and deploy
 
-GitHub Actions run two workflows on `main`:
+GitHub Actions run three workflows on `main`:
 
 - Lint
 - Test
+- Deploy to GitHub Pages
+
+The deploy workflow builds the app and publishes `dist` to GitHub Pages at [https://moshahan.github.io/tasks-board/](https://moshahan.github.io/tasks-board/).
+
+For that URL to work:
+
+1. The GitHub Pages source must be **GitHub Actions** (Settings → Pages → Build and deployment).
+2. The repository should be named `tasks-board` under your **MoShahan** account, so Pages serves it at `/tasks-board/`.

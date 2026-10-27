@@ -18,4 +18,4 @@ export const PRIORITY_LABELS: Record<Priority | "all", string> = {
   low: "Low",
 };
 
-export const STORAGE_KEY = "recro-tasks";
+export const STORAGE_KEY = "tasks-board";
